@@ -1,63 +1,44 @@
 package ru.yandex.practicum.catsgram.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.catsgram.exceptions.InvalidEmailException;
-import ru.yandex.practicum.catsgram.exceptions.UserAlreadyExistException;
+import ru.yandex.practicum.catsgram.exception.InvalidEmailException;
+import ru.yandex.practicum.catsgram.exception.UserAlreadyExistException;
 import ru.yandex.practicum.catsgram.model.User;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/users")
 public class UserController {
+    private final Map<String, User> users = new HashMap<>();
 
-    private Map<String,User> users = new HashMap<>();
-    private final static Logger log = LoggerFactory.getLogger(PostController.class);
-    @GetMapping("/users")
-    public Map<String,User> getUser() {
-        return users;
+    @GetMapping
+    public Collection<User> findAll() {
+        return users.values();
     }
 
-    @PostMapping("/users")
+    @PostMapping
     public User create(@RequestBody User user) {
-        if(user.getEmail() == null | user.getEmail().isBlank() | user.getEmail().isEmpty()) {
-            log.debug("Отсутствует email");
-            throw new InvalidEmailException("Отсутствует email");
+        if(user.getEmail() == null || user.getEmail().isBlank()) {
+            throw new InvalidEmailException("Адрес электронной почты не может быть пустым.");
         }
-
         if(users.containsKey(user.getEmail())) {
-            log.debug("Такой пользователь уже есть!");
-           throw new UserAlreadyExistException("Такой пользователь уже есть!");
+            throw new UserAlreadyExistException("Пользователь с электронной почтой " +
+                    user.getEmail() + " уже зарегистрирован.");
         }
-
         users.put(user.getEmail(), user);
-        log.debug("Добавлен пользователь " +user);
-        return users.get(user.getEmail());
+        return user;
     }
 
-    @PutMapping("/users")
-    public User upUserOrCreateUser(@RequestBody User user) {
-        if(user.getEmail() == null | user.getEmail().isBlank() | user.getEmail().isEmpty()) {
-            log.debug("Отсутствует email");
-            throw new InvalidEmailException("Отсутствует email");
+    @PutMapping
+    public User put(@RequestBody User user) {
+        if(user.getEmail() == null || user.getEmail().isBlank()) {
+            throw new InvalidEmailException("Адрес электронной почты не может быть пустым.");
         }
+        users.put(user.getEmail(), user);
 
-        if(users.containsKey(user.getEmail())) {
-        User user1 = new User(user.getEmail()
-                , user.getNickname()
-                ,user.getBirthdate());
-              //  , user.getBirthdate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-
-        users.remove(user.getEmail());
-        users.put(user.getEmail(),user1);
-            log.debug("Обновлен пользователь " +user1);
-        } else {
-            users.put(user.getEmail(), user);
-            log.debug("Добавлен пользователь " +user);
-        }
-        return users.get(user.getEmail());
+        return user;
     }
-
 }

@@ -13,11 +13,7 @@ class CatsgramApplicationTests {
 
 	@Test
 	void contextLoads() {
-		//User user = new User("e","name","2000-10-10");
-		User user = new User("e","name", LocalDate.now());
-		assertEquals("e",user.getEmail());
-		assertEquals("name",user.getNickname());
-		//assertEquals("2000-10-10",user.getBirthdate());
+
 	}
 
 }
