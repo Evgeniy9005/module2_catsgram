@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.catsgram.exception.IncorrectParameterException;
 import ru.yandex.practicum.catsgram.model.Post;
 import ru.yandex.practicum.catsgram.service.PostService;
 
@@ -31,8 +32,14 @@ public class PostController {
             @RequestParam(defaultValue = "10", required = false) Integer size,
             @RequestParam(defaultValue = DESCENDING_ORDER, required = false) String sort
     ) {
-        if (!SORTS.contains(sort) || page < 0 || size <= 0) {
-            throw new IllegalArgumentException();
+        if (!SORTS.contains(sort)) {
+            throw new IncorrectParameterException("sort");
+        }
+        if (page < 0) {
+            throw new IncorrectParameterException("page");
+        }
+        if (size <= 0) {
+            throw new IncorrectParameterException("size");
         }
 
         Integer from = page * size;
@@ -40,9 +47,10 @@ public class PostController {
     }
 
 
-
     @GetMapping("/post/{postId}")
     public Post findPost(@PathVariable("postId") Integer postId) {
         return postService.findPostById(postId);
     }
+
+
 }
